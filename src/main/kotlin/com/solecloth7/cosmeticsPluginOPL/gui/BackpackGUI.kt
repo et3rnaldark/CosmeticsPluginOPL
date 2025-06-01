@@ -85,6 +85,7 @@ object BackpackGUI {
         }
 
         event.isCancelled = true
+
         val chatColors = CosmeticManager.getCosmetics(player)
         val nicknameTickets = NicknameTicketManager.getCosmetics(player)
         val combined = chatColors + nicknameTickets
@@ -92,12 +93,16 @@ object BackpackGUI {
 
         when (cosmetic) {
             is ChatColorCosmetic -> {
-                // Pass the ChatColorCosmetic object
-                EquipGUI.handleChatColorClick(player, event, cosmetic)
+                EquipGUI.openChatColor(player, cosmetic)
+            }
+            is NicknameTicketCosmetic.Unused -> {
+                player.closeInventory()
+                player.sendMessage("§7Enter your desired nickname in chat:")
+                val index = event.slot
+                ChatNicknameInputManager.requestInput(player, index, cosmetic)
             }
             is NicknameTicketCosmetic.Used -> {
-                // Pass the NicknameTicketCosmetic.Used object
-                EquipGUI.handleNicknameClick(player, event, cosmetic)
+                EquipGUI.openNicknameTicket(player, cosmetic)
             }
         }
     }
