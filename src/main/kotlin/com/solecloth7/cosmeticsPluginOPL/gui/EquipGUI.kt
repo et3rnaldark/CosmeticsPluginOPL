@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack
 object EquipGUI {
     private const val SIZE = 9
 
-    // Method for handling ChatColorCosmetic
     fun openChatColor(player: Player, cosmetic: ChatColorCosmetic) {
         val inv = Bukkit.createInventory(null, SIZE, "Equip Chat Color")
         inv.setItem(4, cosmetic.toItem())
@@ -29,7 +28,6 @@ object EquipGUI {
         player.openInventory(inv)
     }
 
-    // Method for handling NicknameTicketCosmetic.Used
     fun openNicknameTicket(player: Player, cosmetic: NicknameTicketCosmetic.Used) {
         val inv = Bukkit.createInventory(null, SIZE, "Equip Nickname")
         inv.setItem(4, cosmetic.toItem())
@@ -44,11 +42,10 @@ object EquipGUI {
         player.openInventory(inv)
     }
 
-    // Handle ChatColorCosmetic Click
+    // ✅ MAKE THIS PUBLIC
     fun handleChatColorClick(player: Player, event: InventoryClickEvent, cosmetic: ChatColorCosmetic) {
         val equipped = CosmeticManager.getEquippedCosmetic(player)
         val isEquipped = equipped === cosmetic
-
         event.isCancelled = true
 
         when (event.rawSlot) {
@@ -74,7 +71,7 @@ object EquipGUI {
         player.closeInventory()
     }
 
-    // Handle NicknameTicketCosmetic.Used Click
+    // ✅ MAKE THIS PUBLIC
     fun handleNicknameClick(player: Player, event: InventoryClickEvent, cosmetic: NicknameTicketCosmetic.Used) {
         event.isCancelled = true
 
@@ -91,8 +88,7 @@ object EquipGUI {
                 }
             }
             6 -> {
-                // Update this to fix the equip condition
-                if (!cosmetic.nickname.startsWith("~") && cosmetic.nickname != player.displayName) {
+                if (player.displayName != "~${cosmetic.nickname}") {
                     NicknameTicketManager.equip(player, cosmetic)
                     player.sendMessage("§aEquipped nickname: ~${cosmetic.nickname}")
                 } else {
