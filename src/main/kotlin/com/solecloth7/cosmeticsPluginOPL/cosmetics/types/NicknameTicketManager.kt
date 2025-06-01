@@ -3,6 +3,8 @@ package com.solecloth7.cosmeticsPluginOPL.cosmetics
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.storage.JsonBackpackStorage
 import org.bukkit.entity.Player
+import net.luckperms.api.LuckPermsProvider
+import net.luckperms.api.node.types.MetaNode
 
 object NicknameTicketManager {
     private val loaded = mutableMapOf<String, MutableList<NicknameTicketCosmetic>>()
@@ -31,6 +33,17 @@ object NicknameTicketManager {
         }
     }
 
+    fun applyNickname(player: Player, nickname: String) {
+        val luckPerms = LuckPermsProvider.get()
+        val user = luckPerms.userManager.getUser(player.uniqueId) ?: return
+
+        user.data().clear { it is MetaNode && it.key == "nickname" }
+
+        val node = MetaNode.builder("nickname", "~$nickname").build()
+        user.data().add(node)
+
+        luckPerms.userManager.saveUser(user)
+    }
 
     fun setAll(player: Player, newList: List<NicknameTicketCosmetic>) {
         loaded[player.uniqueId.toString()] = newList.toMutableList()
@@ -39,13 +52,21 @@ object NicknameTicketManager {
 
     fun equip(player: Player, ticket: NicknameTicketCosmetic.Used) {
         equippedNicknameMap[player.uniqueId.toString()] = ticket.nickname
-        player.setDisplayName("~${ticket.nickname}")  // Correct display name format
+        player.setDisplayName("~${ticket.nickname}")
+        applyNickname(player, ticket.nickname)
         save(player)
     }
 
     fun unequip(player: Player) {
         equippedNicknameMap[player.uniqueId.toString()] = null
-        player.setDisplayName(player.name)  // Reset to original name
+        player.setDisplayName(player.name)
+
+        // Clear LuckPerms nickname
+        val luckPerms = LuckPermsProvider.get()
+        val user = luckPerms.userManager.getUser(player.uniqueId)
+        user?.data()?.clear { it is MetaNode && it.key == "nickname" }
+        if (user != null) luckPerms.userManager.saveUser(user)
+
         save(player)
     }
 

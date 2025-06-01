@@ -37,19 +37,21 @@ object ChatColorModifyCommand {
         when (val key = args.getOrNull(0)?.lowercase()) {
             "paint" -> {
                 val hexes = args.getOrNull(1)?.split(",") ?: emptyList()
-                val name = args.getOrNull(2) ?: "Custom"
-                val bold = args.getOrNull(3)?.equals("bold", ignoreCase = true) ?: false
-
                 if (hexes.isEmpty() || hexes.any { !it.matches(Regex("^#[0-9a-fA-F]{6}$")) }) {
                     sender.sendMessage("§cInvalid hex color format. Use #RRGGBB,#RRGGBB,...")
                     return
                 }
 
+                val rawArgs = args.drop(2)
+                val bold = rawArgs.any { it.equals("bold", ignoreCase = true) }
+                val nameParts = rawArgs.filterNot { it.equals("bold", ignoreCase = true) }
+                val name = if (nameParts.isEmpty()) "Custom" else nameParts.joinToString(" ")
+
                 cosmetic.hexColors = hexes
                 cosmetic.text = name
                 cosmetic.bold = bold
                 CosmeticManager.updateCosmetic(target, cosmetic)
-                sender.sendMessage("§aUpdated paint to $name with gradient $hexes")
+                sender.sendMessage("§aUpdated paint to §f$name §awith gradient §f$hexes")
             }
 
             "quality" -> {
@@ -73,20 +75,18 @@ object ChatColorModifyCommand {
                 CosmeticManager.updateCosmetic(target, cosmetic)
                 sender.sendMessage("§aSet registered to $value.")
             }
-            in listOf("note_0", "note_1", "note_2", "note_3", "note_4") -> {
-                val index = key?.removePrefix("note_")?.toIntOrNull()
-                val value = args.drop(1).joinToString(" ").trim()
 
-                if (index == null || index !in 0..4) {
+            in listOf("note_0", "note_1", "note_2", "note_3", "note_4") -> {
+                val noteIndex = key!!.removePrefix("note_").toIntOrNull()
+                if (noteIndex == null || noteIndex !in 0..4) {
                     sender.sendMessage("§cInvalid note index.")
                     return
                 }
-
-                cosmetic.notes[index] = value
+                val value = args.drop(1).joinToString(" ").trim()
+                cosmetic.notes[noteIndex] = value
                 CosmeticManager.updateCosmetic(target, cosmetic)
-                sender.sendMessage("§aUpdated Note $index to: §f$value")
+                sender.sendMessage("§aUpdated Note $noteIndex to: §f$value")
             }
-
 
             else -> {
                 sender.sendMessage("§cInvalid modify command. Options: paint, quality, registered, note_0...note_4")
