@@ -21,7 +21,7 @@ class CosmeticsPluginOPL : JavaPlugin() {
 
         logger.info("Plugin OPLCosmetics enabled with version 1.0.0")
     }
-
+// Test
     override fun onDisable() {
         logger.info("Plugin OPLCosmetics Disabled with version 1.0.0.")
     }
