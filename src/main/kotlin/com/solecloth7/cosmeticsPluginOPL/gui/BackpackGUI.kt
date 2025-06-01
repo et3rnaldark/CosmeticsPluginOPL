@@ -17,10 +17,10 @@ import org.bukkit.inventory.ItemStack
 
 object BackpackGUI {
     private const val SIZE = 36
-    private const val TITLE = "Cosmetic Backpack"
     private const val MOVE_SLOT = SIZE - 1
     private const val VIEWING_PREFIX = "Viewing Backpack: "
     private const val SELECTING_PREFIX = "Selecting Backpack: "
+    private const val TITLE = "Cosmetic Backpack" // Define the TITLE constant
 
     fun open(player: Player) {
         openInternal(player, player, false)
@@ -108,7 +108,7 @@ object BackpackGUI {
             is ChatColorCosmetic -> EquipGUI.openChatColor(player, cosmetic)
             is NicknameTicketCosmetic.Unused -> {
                 player.closeInventory()
-                player.sendMessage("§7Enter your desired nickname in chat:")
+                player.sendMessage("§7Enter your desired nickname in chat: ")
                 ChatNicknameInputManager.requestInput(player, cosmetic)
             }
             is NicknameTicketCosmetic.Used -> EquipGUI.openNicknameTicket(player, cosmetic)

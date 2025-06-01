@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import com.solecloth7.cosmeticsPluginOPL.gui.ItemMoveSession
 
 object EquipGUI {
     private const val SIZE = 9
@@ -25,7 +26,7 @@ object EquipGUI {
         inv.setItem(0, createPane(Material.BARRIER, "§4§lDelete Cosmetic"))
         inv.setItem(2, createPane(Material.RED_STAINED_GLASS_PANE, if (isEquipped) "§cUnequip" else "§cCancel"))
         inv.setItem(6, createPane(Material.LIME_STAINED_GLASS_PANE, "§a§lEquip"))
-        inv.setItem(8, createPane(Material.YELLOW_STAINED_GLASS_PANE, "§6§lMove Item"))
+        inv.setItem(8, createPane(Material.YELLOW_STAINED_GLASS_PANE, "§6§lMove Item"))  // Move Item Button
         player.openInventory(inv)
     }
 
@@ -39,7 +40,7 @@ object EquipGUI {
         inv.setItem(0, createPane(Material.BARRIER, "§4§lDelete Nickname"))
         inv.setItem(2, createPane(Material.RED_STAINED_GLASS_PANE, if (isEquipped) "§cUnequip Nickname" else "§cCancel"))
         inv.setItem(6, createPane(Material.LIME_STAINED_GLASS_PANE, "§a§lEquip Nickname"))
-
+        inv.setItem(8, createPane(Material.YELLOW_STAINED_GLASS_PANE, "§6§lMove Item"))  // Move Item Button
         player.openInventory(inv)
     }
 
@@ -53,7 +54,7 @@ object EquipGUI {
         inv.setItem(0, createPane(Material.BARRIER, "§4§lDelete Title"))
         inv.setItem(2, createPane(Material.RED_STAINED_GLASS_PANE, if (isEquipped) "§cUnequip Title" else "§cCancel"))
         inv.setItem(6, createPane(Material.LIME_STAINED_GLASS_PANE, "§a§lEquip Title"))
-
+        inv.setItem(8, createPane(Material.YELLOW_STAINED_GLASS_PANE, "§6§lMove Item"))  // Move Item Button
         player.openInventory(inv)
     }
 
@@ -80,6 +81,11 @@ object EquipGUI {
                     CosmeticManager.unequipCosmetic(player)
                     player.sendMessage("§cUnequipped chat color.")
                 }
+            }
+            8 -> {
+                // Move Item logic for this slot
+                ItemMoveSession.startMove(player.uniqueId, 4)
+                player.sendMessage("§eClick a new slot to move this item.")
             }
         }
         player.closeInventory()
@@ -118,6 +124,11 @@ object EquipGUI {
                     player.sendMessage("§cUnequipped nickname.")
                 }
             }
+            8 -> {
+                // Move Item logic for this slot
+                ItemMoveSession.startMove(player.uniqueId, 4)
+                player.sendMessage("§eClick a new slot to move this item.")
+            }
         }
 
         player.closeInventory()
@@ -147,6 +158,11 @@ object EquipGUI {
                     CosmeticManager.unequipTitleCosmetic(player)
                     player.sendMessage("§cUnequipped title.")
                 }
+            }
+            8 -> {
+                // Move Item logic for this slot
+                ItemMoveSession.startMove(player.uniqueId, 4)
+                player.sendMessage("§eClick a new slot to move this item.")
             }
         }
 
