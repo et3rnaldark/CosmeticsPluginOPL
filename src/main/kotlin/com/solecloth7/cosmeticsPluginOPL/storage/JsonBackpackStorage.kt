@@ -1,18 +1,22 @@
 package com.solecloth7.cosmeticsPluginOPL.storage
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
+import com.google.gson.*
 import com.solecloth7.cosmeticsPluginOPL.model.BackpackData
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic.*
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import org.bukkit.entity.Player
-import org.codehaus.plexus.util.FileUtils.getFile
 import java.io.File
-import java.util.UUID
+import java.lang.reflect.Type
+import java.util.*
 
 object JsonBackpackStorage {
-    private val gson = GsonBuilder().setPrettyPrinting().create()
+    private val gson: Gson = GsonBuilder()
+        .registerTypeAdapter(NicknameTicketCosmetic::class.java, NicknameTicketCosmeticAdapter())
+        .setPrettyPrinting()
+        .create()
+
     lateinit var dataFolder: File
 
     fun getFileFor(player: Player): File = File(dataFolder, "${player.uniqueId}.json")
@@ -53,6 +57,24 @@ object JsonBackpackStorage {
             ex.printStackTrace()
             println("❌ Failed to load backpack for ${player.name} from ${file.absolutePath}")
             BackpackData()
+        }
+    }
+
+    private class NicknameTicketCosmeticAdapter : JsonDeserializer<NicknameTicketCosmetic>, JsonSerializer<NicknameTicketCosmetic> {
+        override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): NicknameTicketCosmetic {
+            val obj = json.asJsonObject
+            return if (obj.has("nickname")) {
+                context.deserialize<Used>(json, Used::class.java)
+            } else {
+                context.deserialize<Unused>(json, Unused::class.java)
+            }
+        }
+
+        override fun serialize(src: NicknameTicketCosmetic, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+            return when (src) {
+                is Used -> context.serialize(src, Used::class.java)
+                is Unused -> context.serialize(src, Unused::class.java)
+            }
         }
     }
 }
