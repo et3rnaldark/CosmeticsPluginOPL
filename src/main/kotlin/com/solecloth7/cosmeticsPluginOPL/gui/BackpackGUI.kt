@@ -6,6 +6,7 @@ import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -24,18 +25,21 @@ object BackpackGUI {
         val inv: Inventory = Bukkit.createInventory(null, SIZE, TITLE)
         val chatColorCosmetics = CosmeticManager.getCosmetics(player)
         val nicknameTickets = NicknameTicketManager.getCosmetics(player)
-        val allCosmetics = chatColorCosmetics + nicknameTickets
+        val titleCosmetics = CosmeticManager.getTitleCosmetics(player)
+        val allCosmetics = chatColorCosmetics + nicknameTickets + titleCosmetics
 
         for ((i, cosmetic) in allCosmetics.withIndex()) {
             if (i < SIZE) {
                 val item = when (cosmetic) {
                     is ChatColorCosmetic -> cosmetic.toItem()
                     is NicknameTicketCosmetic -> cosmetic.toItem()
+                    is TitleCosmetic -> cosmetic.toItem()
                     else -> continue
                 }
                 inv.setItem(i, item)
             }
         }
+
         for (i in allCosmetics.size until SIZE) {
             inv.setItem(i, ItemStack(Material.GRAY_STAINED_GLASS_PANE).apply {
                 val meta = itemMeta
@@ -52,13 +56,15 @@ object BackpackGUI {
         val inv: Inventory = Bukkit.createInventory(null, SIZE, title)
         val chatColorCosmetics = CosmeticManager.getCosmetics(target)
         val nicknameTickets = NicknameTicketManager.getCosmetics(target)
-        val allCosmetics = chatColorCosmetics + nicknameTickets
+        val titleCosmetics = CosmeticManager.getTitleCosmetics(target)
+        val allCosmetics = chatColorCosmetics + nicknameTickets + titleCosmetics
 
         for ((i, cosmetic) in allCosmetics.withIndex()) {
             if (i < SIZE) {
                 val item = when (cosmetic) {
                     is ChatColorCosmetic -> cosmetic.toItem()
                     is NicknameTicketCosmetic -> cosmetic.toItem()
+                    is TitleCosmetic -> cosmetic.toItem()
                     else -> continue
                 }
                 inv.setItem(i, item)
@@ -86,24 +92,21 @@ object BackpackGUI {
 
         event.isCancelled = true
 
-        val chatColors = CosmeticManager.getCosmetics(player)
-        val nicknameTickets = NicknameTicketManager.getCosmetics(player)
-        val combined = chatColors + nicknameTickets
+        val combined = CosmeticManager.getCosmetics(player) +
+                NicknameTicketManager.getCosmetics(player) +
+                CosmeticManager.getTitleCosmetics(player)
+
         val cosmetic = combined.getOrNull(event.slot) ?: return
 
         when (cosmetic) {
-            is ChatColorCosmetic -> {
-                EquipGUI.openChatColor(player, cosmetic)
-            }
+            is ChatColorCosmetic -> EquipGUI.openChatColor(player, cosmetic)
             is NicknameTicketCosmetic.Unused -> {
                 player.closeInventory()
                 player.sendMessage("§7Enter your desired nickname in chat:")
-                val index = event.slot
                 ChatNicknameInputManager.requestInput(player, cosmetic)
             }
-            is NicknameTicketCosmetic.Used -> {
-                EquipGUI.openNicknameTicket(player, cosmetic)
-            }
+            is NicknameTicketCosmetic.Used -> EquipGUI.openNicknameTicket(player, cosmetic)
+            is TitleCosmetic -> EquipGUI.openTitle(player, cosmetic)
         }
     }
 
@@ -112,9 +115,9 @@ object BackpackGUI {
         val clicked = event.currentItem ?: return
         if (clicked.type != Material.PAPER) return
 
-        val chatColors = CosmeticManager.getCosmetics(target)
-        val nicknameTickets = NicknameTicketManager.getCosmetics(target)
-        val combined = chatColors + nicknameTickets
+        val combined = CosmeticManager.getCosmetics(target) +
+                NicknameTicketManager.getCosmetics(target) +
+                CosmeticManager.getTitleCosmetics(target)
 
         val cosmetic = combined.getOrNull(event.slot) ?: return
 

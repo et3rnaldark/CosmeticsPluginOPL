@@ -5,6 +5,7 @@ import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -41,6 +42,12 @@ class ItemCreateSubcommand : AdminSubcommand {
                 sender.sendMessage("§aGave Nickname Ticket to §e${target.name}§a.")
             }
 
+            "title" -> {
+                CosmeticManager.load(target)
+                CosmeticManager.giveTitleCosmetic(target, TitleCosmetic())
+                sender.sendMessage("§aGave default Title to §e${target.name}§a.")
+            }
+
             else -> {
                 sender.sendMessage("§cUnsupported cosmetic type: $type")
             }
@@ -50,7 +57,7 @@ class ItemCreateSubcommand : AdminSubcommand {
     override fun tabComplete(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
             1 -> Bukkit.getOnlinePlayers().map { it.name }.filter { it.startsWith(args[0], ignoreCase = true) }
-            2 -> listOf("chat_color", "nickname_ticket").filter { it.startsWith(args[1], ignoreCase = true) }
+            2 -> listOf("chat_color", "nickname_ticket", "title").filter { it.startsWith(args[1], ignoreCase = true) }
             else -> emptyList()
         }
     }

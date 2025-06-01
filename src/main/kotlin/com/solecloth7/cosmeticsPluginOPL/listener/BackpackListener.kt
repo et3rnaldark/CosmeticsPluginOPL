@@ -7,6 +7,7 @@ import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -36,7 +37,7 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
             title == "Cosmetic Backpack" -> BackpackGUI.handleClick(player, e)
 
             title.startsWith("Viewing Backpack: ") -> {
-                e.isCancelled = true // View-only mode
+                e.isCancelled = true
             }
 
             title.startsWith("Selecting Backpack: ") -> {
@@ -73,6 +74,18 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
                     player.sendMessage("§cFailed to identify the equipped nickname ticket.")
                 }
             }
+
+            title == "Equip Title" -> {
+                val cosmetic = CosmeticManager.getTitleCosmetics(player)
+                    .find { it.toItem().isSimilar(e.inventory.getItem(4)) }
+
+                if (cosmetic != null) {
+                    EquipGUI.handleTitleClick(player, e, cosmetic)
+                } else {
+                    e.isCancelled = true
+                    player.sendMessage("§cFailed to identify the equipped title cosmetic.")
+                }
+            }
         }
     }
 
@@ -82,6 +95,7 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
         if (title == "Cosmetic Backpack" ||
             title == "Equip Chat Color" ||
             title == "Equip Nickname" ||
+            title == "Equip Title" ||
             title.startsWith("Viewing Backpack: ") ||
             title.startsWith("Selecting Backpack: ")
         ) {

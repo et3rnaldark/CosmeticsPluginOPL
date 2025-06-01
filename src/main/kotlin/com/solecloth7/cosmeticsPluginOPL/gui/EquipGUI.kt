@@ -4,6 +4,7 @@ import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -42,7 +43,20 @@ object EquipGUI {
         player.openInventory(inv)
     }
 
-    // ✅ MAKE THIS PUBLIC
+    fun openTitle(player: Player, cosmetic: TitleCosmetic) {
+        val inv = Bukkit.createInventory(null, SIZE, "Equip Title")
+        inv.setItem(4, cosmetic.toItem())
+
+        val equipped = CosmeticManager.getEquippedTitle(player)
+        val isEquipped = equipped?.id == cosmetic.id
+
+        inv.setItem(0, createPane(Material.BARRIER, "§4§lDelete Title"))
+        inv.setItem(2, createPane(Material.RED_STAINED_GLASS_PANE, if (isEquipped) "§cUnequip Title" else "§cCancel"))
+        inv.setItem(6, createPane(Material.LIME_STAINED_GLASS_PANE, "§a§lEquip Title"))
+
+        player.openInventory(inv)
+    }
+
     fun handleChatColorClick(player: Player, event: InventoryClickEvent, cosmetic: ChatColorCosmetic) {
         val equipped = CosmeticManager.getEquippedCosmetic(player)
         val isEquipped = equipped === cosmetic
@@ -71,7 +85,6 @@ object EquipGUI {
         player.closeInventory()
     }
 
-    // ✅ MAKE THIS PUBLIC
     fun handleNicknameClick(player: Player, event: InventoryClickEvent, cosmetic: NicknameTicketCosmetic.Used) {
         event.isCancelled = true
 
@@ -80,7 +93,6 @@ object EquipGUI {
                 val tickets = NicknameTicketManager.getCosmetics(player).toMutableList()
                 val index = tickets.indexOfFirst { it is NicknameTicketCosmetic.Used && it.nickname == cosmetic.nickname }
                 if (index != -1) {
-                    // ✅ Unequip first if it's currently equipped
                     if (NicknameTicketManager.isEquipped(player, cosmetic)) {
                         NicknameTicketManager.unequip(player)
                     }
@@ -104,6 +116,36 @@ object EquipGUI {
                 if (NicknameTicketManager.isEquipped(player, cosmetic)) {
                     NicknameTicketManager.unequip(player)
                     player.sendMessage("§cUnequipped nickname.")
+                }
+            }
+        }
+
+        player.closeInventory()
+    }
+
+    fun handleTitleClick(player: Player, event: InventoryClickEvent, cosmetic: TitleCosmetic) {
+        event.isCancelled = true
+
+        val equipped = CosmeticManager.getEquippedTitle(player)
+        val isEquipped = equipped?.id == cosmetic.id
+
+        when (event.rawSlot) {
+            0 -> {
+                CosmeticManager.deleteTitleCosmetic(player, cosmetic)
+                player.sendMessage("§cDeleted title: ${cosmetic.getDisplayName()}")
+            }
+            6 -> {
+                if (!isEquipped) {
+                    CosmeticManager.equipTitleCosmetic(player, cosmetic)
+                    player.sendMessage("§aEquipped title: ${cosmetic.getDisplayName()}")
+                } else {
+                    player.sendMessage("§cThis title is already equipped!")
+                }
+            }
+            2 -> {
+                if (isEquipped) {
+                    CosmeticManager.unequipTitleCosmetic(player)
+                    player.sendMessage("§cUnequipped title.")
                 }
             }
         }

@@ -17,6 +17,7 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
     fun onChat(e: AsyncPlayerChatEvent) {
         val player = e.player
 
+        // If nickname input is active
         if (ChatNicknameInputManager.isWaiting(player)) {
             e.isCancelled = true
             Bukkit.getScheduler().runTask(plugin, Runnable {
@@ -25,21 +26,26 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
             return
         }
 
+        // Cancel vanilla chat and broadcast our own
         e.isCancelled = true
 
         Bukkit.getScheduler().runTask(plugin, Runnable {
             val nickname = NicknameTicketManager.getEquippedNickname(player)?.nickname
             val name = if (nickname != null) "§f~$nickname" else player.name
 
+            val title = CosmeticManager.getEquippedTitle(player)?.getDisplayName()?.let {
+                "§8$it "
+            } ?: ""
+
             val chatColor = CosmeticManager.getEquippedCosmetic(player)
             val message = chatColor?.let {
                 ColorUtil.gradientName(e.message, it.hexColors, it.bold)
             } ?: e.message
 
-            // Broadcast chat message
-            Bukkit.broadcastMessage("§7$name§8: §f$message")
+            // Broadcast final formatted message
+            Bukkit.broadcastMessage("$title§7$name§8: §7$message")
 
-            // Track message milestone level-ups if registered
+            // Track registered chat milestones
             if (chatColor?.registered == true) {
                 val before = chatColor.messagesSent
                 chatColor.messagesSent += 1

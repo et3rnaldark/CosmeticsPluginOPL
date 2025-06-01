@@ -1,5 +1,6 @@
 package com.solecloth7.cosmeticsPluginOPL.util
 
+import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import java.util.*
 import org.bukkit.configuration.file.YamlConfiguration
@@ -19,5 +20,15 @@ object ItemStackUtil {
         val yaml = YamlConfiguration()
         yaml.load(String(bytes))
         return yaml.getItemStack("i")
+    }
+
+    fun create(material: Material, name: String, lore: List<String>, customModelData: Int): ItemStack {
+        val item = ItemStack(material)
+        val meta = item.itemMeta!!
+        meta.setDisplayName(name)
+        meta.lore = lore
+        meta.setCustomModelData(customModelData)
+        item.itemMeta = meta
+        return item
     }
 }

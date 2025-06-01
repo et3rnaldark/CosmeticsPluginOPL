@@ -5,9 +5,11 @@ import com.google.gson.JsonObject
 import com.solecloth7.cosmeticsPluginOPL.model.BackpackData
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import org.bukkit.entity.Player
 import org.codehaus.plexus.util.FileUtils.getFile
 import java.io.File
+import java.util.UUID
 
 object JsonBackpackStorage {
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -19,14 +21,18 @@ object JsonBackpackStorage {
         player: Player,
         cosmetics: List<ChatColorCosmetic>,
         equipped: Int?,
-        nicknameTickets: List<NicknameTicketCosmetic>
+        nicknameTickets: List<NicknameTicketCosmetic>,
+        titleCosmetics: List<TitleCosmetic>,
+        equippedTitleId: UUID?
     ) {
-        val file = getFile(player.uniqueId.toString())
+        val file = getFileFor(player)
         val json = JsonObject()
 
         json.add("chatColorCosmetics", gson.toJsonTree(cosmetics))
         json.addProperty("equippedChatColorIndex", equipped)
         json.add("nicknameTicketCosmetics", gson.toJsonTree(nicknameTickets))
+        json.add("titleCosmetics", gson.toJsonTree(titleCosmetics))
+        json.addProperty("equippedTitleId", equippedTitleId?.toString())
 
         file.writeText(gson.toJson(json))
     }

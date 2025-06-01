@@ -3,6 +3,7 @@ package com.solecloth7.cosmeticsPluginOPL.command.sub.item
 import com.solecloth7.cosmeticsPluginOPL.command.AdminSubcommand
 import com.solecloth7.cosmeticsPluginOPL.command.modify.ChatColorModifyCommand
 import com.solecloth7.cosmeticsPluginOPL.command.modify.NicknameTicketModifyCommand
+import com.solecloth7.cosmeticsPluginOPL.command.modify.TitleModifyCommand
 import org.bukkit.command.CommandSender
 
 class ItemModifySubcommand : AdminSubcommand {
@@ -18,6 +19,7 @@ class ItemModifySubcommand : AdminSubcommand {
         when (val type = args[0].lowercase()) {
             "chat_color" -> ChatColorModifyCommand.handle(sender, args.drop(1))
             "nickname_ticket" -> NicknameTicketModifyCommand.handle(sender, args.drop(1))
+            "title" -> TitleModifyCommand.handle(sender, args.drop(1))
             else -> sender.sendMessage("§cUnsupported cosmetic type: $type")
         }
     }
