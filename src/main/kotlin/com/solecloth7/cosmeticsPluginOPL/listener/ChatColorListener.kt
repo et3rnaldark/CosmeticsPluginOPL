@@ -5,13 +5,14 @@ import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import com.solecloth7.cosmeticsPluginOPL.util.ColorUtil
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class ChatColorListener(private val plugin: JavaPlugin) : Listener {
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onChat(e: AsyncPlayerChatEvent) {
         val player = e.player
 

@@ -11,17 +11,22 @@ import org.bukkit.plugin.java.JavaPlugin
 class CosmeticsPluginOPL : JavaPlugin() {
 
     override fun onEnable() {
+        // Set data folder for storing backpacks
         JsonBackpackStorage.dataFolder = dataFolder.resolve("backpacks")
+
+        // Registering commands
         getCommand("backpack")?.setExecutor(BackpackCommand())
         getCommand("a")?.setExecutor(AdminCommand())
         getCommand("a")?.tabCompleter = AdminCommand()
+
+        // Registering event listeners
         server.pluginManager.registerEvents(ChatColorListener(this), this)
         server.pluginManager.registerEvents(BackpackListener(this), this)
         server.pluginManager.registerEvents(PlayerJoinListener(), this)
 
         logger.info("Plugin OPLCosmetics enabled with version 1.0.0")
     }
-// Test
+
     override fun onDisable() {
         logger.info("Plugin OPLCosmetics Disabled with version 1.0.0.")
     }
