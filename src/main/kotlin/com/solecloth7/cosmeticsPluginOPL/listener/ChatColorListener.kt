@@ -17,7 +17,14 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
         val player = e.player
 
         // ✅ Prevent chat color handling if nickname input is active
-        if (ChatNicknameInputManager.isWaiting(player)) return
+        if (ChatNicknameInputManager.isWaiting(player)) {
+            e.isCancelled = true
+            val msg = e.message
+            Bukkit.getScheduler().runTask(plugin, Runnable {
+                ChatNicknameInputManager.handleChat(player, msg)
+            })
+            return
+        }
 
         val cosmetic = CosmeticManager.getEquippedCosmetic(player) ?: return
 

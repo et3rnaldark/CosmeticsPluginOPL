@@ -6,10 +6,12 @@ import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
+import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
@@ -36,7 +38,7 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
                 val cosmetics = CosmeticManager.getCosmetics(player)
                 val cosmetic = cosmetics.find { it.toItem().isSimilar(e.inventory.getItem(4)) }
                 if (cosmetic != null) {
-                    EquipGUI.handleChatColorClick(player, e, cosmetic as ChatColorCosmetic) // Correct type casting here
+                    EquipGUI.handleChatColorClick(player, e, cosmetic as ChatColorCosmetic)
                 } else {
                     e.isCancelled = true
                 }
@@ -59,6 +61,19 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
         val title = e.view.title
         if (title == "Cosmetic Backpack" || title == "Equip Chat Color" || title == "Equip Nickname") {
             e.isCancelled = true
+        }
+    }
+
+    // ✅ This is the part you were missing
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onChat(e: AsyncPlayerChatEvent) {
+        val player = e.player
+        if (ChatNicknameInputManager.isWaiting(player)) {
+            e.isCancelled = true
+            val msg = e.message
+            Bukkit.getScheduler().runTask(plugin, Runnable {
+                ChatNicknameInputManager.handleChat(player, msg)
+            })
         }
     }
 }
