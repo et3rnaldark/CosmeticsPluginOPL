@@ -80,6 +80,11 @@ object EquipGUI {
                 val tickets = NicknameTicketManager.getCosmetics(player).toMutableList()
                 val index = tickets.indexOfFirst { it is NicknameTicketCosmetic.Used && it.nickname == cosmetic.nickname }
                 if (index != -1) {
+                    // ✅ Unequip first if it's currently equipped
+                    if (NicknameTicketManager.isEquipped(player, cosmetic)) {
+                        NicknameTicketManager.unequip(player)
+                    }
+
                     tickets.removeAt(index)
                     NicknameTicketManager.setAll(player, tickets)
                     player.sendMessage("§cDeleted nickname: ~${cosmetic.nickname}")
@@ -88,7 +93,7 @@ object EquipGUI {
                 }
             }
             6 -> {
-                if (player.displayName != "~${cosmetic.nickname}") {
+                if (!NicknameTicketManager.isEquipped(player, cosmetic)) {
                     NicknameTicketManager.equip(player, cosmetic)
                     player.sendMessage("§aEquipped nickname: ~${cosmetic.nickname}")
                 } else {
@@ -96,13 +101,13 @@ object EquipGUI {
                 }
             }
             2 -> {
-                val equipped = NicknameTicketManager.getEquippedNickname(player)
-                if (equipped?.nickname == cosmetic.nickname) {
+                if (NicknameTicketManager.isEquipped(player, cosmetic)) {
                     NicknameTicketManager.unequip(player)
                     player.sendMessage("§cUnequipped nickname.")
                 }
             }
         }
+
         player.closeInventory()
     }
 
