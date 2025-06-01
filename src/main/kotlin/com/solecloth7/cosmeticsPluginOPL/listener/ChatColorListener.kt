@@ -37,7 +37,7 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
             } ?: e.message
 
             // Broadcast chat message
-            Bukkit.broadcastMessage("§7$name§7: §f$message")
+            Bukkit.broadcastMessage("§7$name§8: §f$message")
 
             // Track message milestone level-ups if registered
             if (chatColor?.registered == true) {
