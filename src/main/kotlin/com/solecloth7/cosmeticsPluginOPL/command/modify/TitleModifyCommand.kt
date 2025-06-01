@@ -21,7 +21,7 @@ object TitleModifyCommand {
             return
         }
 
-        val cosmetic = CosmeticManager.getCosmetics(target).getOrNull(index) as? TitleCosmetic
+        val cosmetic = CosmeticManager.getTitleCosmetics(target).getOrNull(index)
         if (cosmetic == null) {
             sender.sendMessage("§cSelected item is not a title cosmetic.")
             return

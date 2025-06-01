@@ -12,7 +12,7 @@ class ItemModifySubcommand : AdminSubcommand {
 
     override fun execute(sender: CommandSender, args: List<String>) {
         if (args.isEmpty()) {
-            sender.sendMessage("§cUsage: /a item modify <chat_color|nickname_ticket> [...]")
+            sender.sendMessage("§cUsage: /a item modify <chat_color|nickname_ticket|title> [...]")
             return
         }
 
@@ -26,11 +26,18 @@ class ItemModifySubcommand : AdminSubcommand {
 
     override fun tabComplete(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
-            1 -> listOf("chat_color", "nickname_ticket").filter { it.startsWith(args[0], ignoreCase = true) }
+            1 -> listOf("chat_color", "nickname_ticket", "title").filter { it.startsWith(args[0], ignoreCase = true) }
             2 -> when (args[0].lowercase()) {
                 "chat_color" -> listOf("paint", "quality", "registered", "note_0", "note_1", "note_2", "note_3", "note_4", "crown", "level")
                 "nickname_ticket" -> listOf("nickname", "quality", "registered")
+                "title" -> listOf("title", "quality", "registered")
                 else -> emptyList()
+            }
+            3 -> {
+                when (args[0].lowercase()) {
+                    "title" -> listOf("basic", "legendary", "mythic", "ascendant", "rare", "unobtainable")
+                    else -> emptyList()
+                }
             }
             else -> emptyList()
         }
