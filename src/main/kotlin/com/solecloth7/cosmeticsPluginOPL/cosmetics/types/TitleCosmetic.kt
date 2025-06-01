@@ -13,7 +13,7 @@ data class TitleCosmetic(
     var messagesSent: Int = 0
 ) {
     fun getDisplayName(): String {
-        return "§8[§7$title§8]"
+        return "§7Title: §8[§7$title§8]"
     }
 
     fun getLore(): List<String> {

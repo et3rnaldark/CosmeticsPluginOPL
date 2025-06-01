@@ -25,7 +25,7 @@ object EquipGUI {
         inv.setItem(0, createPane(Material.BARRIER, "§4§lDelete Cosmetic"))
         inv.setItem(2, createPane(Material.RED_STAINED_GLASS_PANE, if (isEquipped) "§cUnequip" else "§cCancel"))
         inv.setItem(6, createPane(Material.LIME_STAINED_GLASS_PANE, "§a§lEquip"))
-
+        inv.setItem(8, createPane(Material.YELLOW_STAINED_GLASS_PANE, "§6§lMove Item"))
         player.openInventory(inv)
     }
 
