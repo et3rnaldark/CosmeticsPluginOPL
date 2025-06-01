@@ -1,6 +1,7 @@
 package com.solecloth7.cosmeticsPluginOPL.listener
 
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import com.solecloth7.cosmeticsPluginOPL.util.ColorUtil
 import org.bukkit.Bukkit
@@ -16,40 +17,46 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
     fun onChat(e: AsyncPlayerChatEvent) {
         val player = e.player
 
-        // ✅ Prevent chat color handling if nickname input is active
         if (ChatNicknameInputManager.isWaiting(player)) {
             e.isCancelled = true
-            val msg = e.message
             Bukkit.getScheduler().runTask(plugin, Runnable {
-                ChatNicknameInputManager.handleChat(player, msg)
+                ChatNicknameInputManager.handleChat(player, e.message)
             })
             return
         }
 
-        val cosmetic = CosmeticManager.getEquippedCosmetic(player) ?: return
+        e.isCancelled = true
 
-        // Apply gradient to the chat message
-        e.message = ColorUtil.gradientName(e.message, cosmetic.hexColors, cosmetic.bold)
+        Bukkit.getScheduler().runTask(plugin, Runnable {
+            val nickname = NicknameTicketManager.getEquippedNickname(player)?.nickname
+            val name = if (nickname != null) "§f~$nickname" else player.name
 
-        if (!cosmetic.registered) return
+            val chatColor = CosmeticManager.getEquippedCosmetic(player)
+            val message = chatColor?.let {
+                ColorUtil.gradientName(e.message, it.hexColors, it.bold)
+            } ?: e.message
 
-        val before = cosmetic.messagesSent
-        cosmetic.messagesSent += 1
-        val after = cosmetic.messagesSent
+            // Broadcast chat message
+            Bukkit.broadcastMessage("§7$name§7: §f$message")
 
-        val beforeName = getMilestoneName(before)
-        val afterName = getMilestoneName(after)
+            // Track message milestone level-ups if registered
+            if (chatColor?.registered == true) {
+                val before = chatColor.messagesSent
+                chatColor.messagesSent += 1
+                val after = chatColor.messagesSent
 
-        if (beforeName != afterName) {
-            Bukkit.getScheduler().runTask(plugin, Runnable {
-                val preview = ColorUtil.gradientName(cosmetic.text, cosmetic.hexColors, cosmetic.bold)
-                val msg = "§6${player.name}'s §eRegistered Chat Color has leveled up to ${cosmetic.quality.replaceFirstChar { it.uppercase() }} §c§l$afterName §c§lChat Color: §r$preview"
-                Bukkit.broadcastMessage(msg)
-            })
-        }
+                val beforeName = getMilestoneName(before)
+                val afterName = getMilestoneName(after)
 
-        // Save the updated count
-        CosmeticManager.updateCosmetic(player, cosmetic)
+                if (beforeName != afterName) {
+                    val preview = ColorUtil.gradientName(chatColor.text, chatColor.hexColors, chatColor.bold)
+                    val msg = "§6${player.name}'s §eRegistered Chat Color has leveled up to ${chatColor.quality.replaceFirstChar { it.uppercase() }} §c§l$afterName §c§lChat Color: §r$preview"
+                    Bukkit.broadcastMessage(msg)
+                }
+
+                CosmeticManager.updateCosmetic(player, chatColor)
+            }
+        })
     }
 
     private fun getMilestoneName(count: Int): String = when {
