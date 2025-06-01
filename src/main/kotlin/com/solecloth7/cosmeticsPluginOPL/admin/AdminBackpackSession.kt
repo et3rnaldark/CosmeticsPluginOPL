@@ -28,4 +28,6 @@ object AdminBackpackSession {
     // Use these in read-only contexts only
     fun getAllViewing(): Map<UUID, UUID> = viewingMap.mapValues { it.value.first }
     fun getAllSelectedSlots(): Map<UUID, Int> = selectedSlotMap
+    fun getAllowSelect(adminId: UUID): Boolean = viewingMap[adminId]?.second ?: false
+
 }

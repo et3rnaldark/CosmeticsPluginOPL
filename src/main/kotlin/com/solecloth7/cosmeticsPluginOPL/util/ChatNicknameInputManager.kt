@@ -3,22 +3,22 @@ package com.solecloth7.cosmeticsPluginOPL.util
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.gui.BackpackGUI
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.Material
 import java.util.*
 
 object ChatNicknameInputManager {
-    private val pending = mutableMapOf<UUID, Pair<Int, NicknameTicketCosmetic.Unused>>()
+    private val pending = mutableMapOf<UUID, NicknameTicketCosmetic.Unused>()
 
-    fun requestInput(player: Player, slot: Int, ticket: NicknameTicketCosmetic.Unused) {
+    fun requestInput(player: Player, ticket: NicknameTicketCosmetic.Unused) {
         player.sendMessage("§bType your Nickname in chat. Type 'cancel' to abort.")
-        pending[player.uniqueId] = slot to ticket
+        pending[player.uniqueId] = ticket
         player.closeInventory()
     }
 
     fun handleChat(player: Player, message: String): Boolean {
-        val (slot, originalTicket) = pending[player.uniqueId] ?: return false
+        val ticket = pending[player.uniqueId] ?: return false
 
         if (message.equals("cancel", ignoreCase = true)) {
             player.sendMessage("§cCancelled nickname input.")
@@ -28,35 +28,33 @@ object ChatNicknameInputManager {
 
         val cleanedNickname = message.replace(Regex("§[0-9A-FK-ORa-fk-or]"), "")
 
-        val current = NicknameTicketManager.getCosmetics(player).getOrNull(slot)
-        if (current !is NicknameTicketCosmetic.Unused) {
+        val list = NicknameTicketManager.getCosmetics(player).toMutableList()
+        val index = list.indexOfFirst { it === ticket }
+        if (index == -1) {
             player.sendMessage("§c§lError: §cNickname Ticket wasn't found or was already used.")
             pending.remove(player.uniqueId)
             return true
         }
 
-        // Create used ticket
         val used = NicknameTicketCosmetic.Used(
             nickname = cleanedNickname,
             quality = "basic",
             registered = false
         )
 
-        // Replace the old ticket
-        NicknameTicketManager.setCosmetic(player, slot, used)
+        list[index] = used
+        NicknameTicketManager.setAll(player, list)
 
-        // Force save + refresh GUI
-        NicknameTicketManager.save(player)
+        pending.remove(player.uniqueId)
         player.sendMessage("§aNickname set to §f~$cleanedNickname§a!")
         BackpackGUI.open(player)
-        pending.remove(player.uniqueId)
-
         return true
     }
+
     fun isWaiting(player: Player): Boolean = player.uniqueId in pending
 }
 
-
+// Cosmetic item render functions remain unchanged:
 fun NicknameTicketCosmetic.Used.toItem(): ItemStack {
     val item = ItemStack(Material.PAPER)
     val meta = item.itemMeta!!
@@ -81,7 +79,6 @@ fun NicknameTicketCosmetic.Used.toItem(): ItemStack {
     }
 
     meta.setDisplayName("$prefix$nickname")
-
     val lore = mutableListOf<String>()
     lore.add("§8Sets your display name to: §f~$nickname")
     lore.add("§7Click to equip this nickname.")

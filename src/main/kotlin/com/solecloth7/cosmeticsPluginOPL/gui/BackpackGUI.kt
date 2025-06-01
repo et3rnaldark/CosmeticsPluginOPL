@@ -99,7 +99,7 @@ object BackpackGUI {
                 player.closeInventory()
                 player.sendMessage("§7Enter your desired nickname in chat:")
                 val index = event.slot
-                ChatNicknameInputManager.requestInput(player, index, cosmetic)
+                ChatNicknameInputManager.requestInput(player, cosmetic)
             }
             is NicknameTicketCosmetic.Used -> {
                 EquipGUI.openNicknameTicket(player, cosmetic)
