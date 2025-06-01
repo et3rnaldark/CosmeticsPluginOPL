@@ -18,7 +18,9 @@ object NicknameTicketManager {
     fun save(player: Player) {
         val chatColorData = CosmeticManager.getCosmetics(player)
         val nicknameData = loaded[player.uniqueId.toString()] ?: mutableListOf()
-        JsonBackpackStorage.saveBackpack(player, chatColorData, CosmeticManager.getEquippedIndex(player), nicknameData)
+        val titleCosmetics = CosmeticManager.getTitleCosmetics(player)
+        val equippedTitleId = CosmeticManager.getEquippedTitle(player)?.id
+        JsonBackpackStorage.saveBackpack(player, chatColorData, CosmeticManager.getEquippedIndex(player), nicknameData, titleCosmetics, equippedTitleId)
     }
 
     fun getCosmetics(player: Player): List<NicknameTicketCosmetic> {
