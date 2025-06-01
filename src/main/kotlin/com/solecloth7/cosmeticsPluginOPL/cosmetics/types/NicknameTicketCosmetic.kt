@@ -37,7 +37,7 @@ sealed class NicknameTicketCosmetic {
             val lore = mutableListOf<String>()
             lore.add("§8Sets your display name to: §f~$nickname")
             lore.add("§7Click to equip this nickname.")
-            lore.add("§8Level §7${(1..100).random()} §8${quality.capitalize()} Nickname")
+            lore.add("§8Level §71§f§8 ${quality.replaceFirstChar { it.uppercase() }} Nickname")
             if (registered) {
                 lore.add("§c❤️ Messages Sent: 0")
             }

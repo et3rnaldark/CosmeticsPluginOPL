@@ -34,7 +34,7 @@ object ChatColorModifyCommand {
             return
         }
 
-        when (args.getOrNull(0)?.lowercase()) {
+        when (val key = args.getOrNull(0)?.lowercase()) {
             "paint" -> {
                 val hexes = args.getOrNull(1)?.split(",") ?: emptyList()
                 val name = args.getOrNull(2) ?: "Custom"
@@ -73,9 +73,23 @@ object ChatColorModifyCommand {
                 CosmeticManager.updateCosmetic(target, cosmetic)
                 sender.sendMessage("§aSet registered to $value.")
             }
+            in listOf("note_0", "note_1", "note_2", "note_3", "note_4") -> {
+                val index = key?.removePrefix("note_")?.toIntOrNull()
+                val value = args.drop(1).joinToString(" ").trim()
+
+                if (index == null || index !in 0..4) {
+                    sender.sendMessage("§cInvalid note index.")
+                    return
+                }
+
+                cosmetic.notes[index] = value
+                CosmeticManager.updateCosmetic(target, cosmetic)
+                sender.sendMessage("§aUpdated Note $index to: §f$value")
+            }
+
 
             else -> {
-                sender.sendMessage("§cInvalid modify command. Options: paint, quality, registered")
+                sender.sendMessage("§cInvalid modify command. Options: paint, quality, registered, note_0...note_4")
             }
         }
     }
