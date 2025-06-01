@@ -26,28 +26,33 @@ object ChatNicknameInputManager {
             return true
         }
 
+        val cleanedNickname = message.replace(Regex("§[0-9A-FK-ORa-fk-or]"), "")
+
         val current = NicknameTicketManager.getCosmetics(player).getOrNull(slot)
         if (current !is NicknameTicketCosmetic.Unused) {
-            player.sendMessage("§c§lError: §cNickname Ticket wasn't found or was/is already used. Please report this to SoleCloth7!")
+            player.sendMessage("§c§lError: §cNickname Ticket wasn't found or was already used.")
             pending.remove(player.uniqueId)
             return true
         }
-        val cleanedNickname = message.replace(Regex("§[0-9A-FK-ORa-fk-or]"), "")
 
+        // Create used ticket
         val used = NicknameTicketCosmetic.Used(
             nickname = cleanedNickname,
             quality = "basic",
             registered = false
         )
 
+        // Replace the old ticket
         NicknameTicketManager.setCosmetic(player, slot, used)
 
-        player.sendMessage("§aNickname set to §f~$message§a!")
+        // Force save + refresh GUI
+        NicknameTicketManager.save(player)
+        player.sendMessage("§aNickname set to §f~$cleanedNickname§a!")
         BackpackGUI.open(player)
         pending.remove(player.uniqueId)
+
         return true
     }
-
     fun isWaiting(player: Player): Boolean = player.uniqueId in pending
 }
 

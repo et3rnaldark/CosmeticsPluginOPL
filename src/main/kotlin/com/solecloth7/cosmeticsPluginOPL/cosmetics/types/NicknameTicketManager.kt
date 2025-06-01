@@ -31,6 +31,7 @@ object NicknameTicketManager {
         }
     }
 
+
     fun setAll(player: Player, newList: List<NicknameTicketCosmetic>) {
         loaded[player.uniqueId.toString()] = newList.toMutableList()
         save(player)
