@@ -27,18 +27,28 @@ class ItemModifySubcommand : AdminSubcommand {
     override fun tabComplete(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
             1 -> listOf("chat_color", "nickname_ticket", "title").filter { it.startsWith(args[0], ignoreCase = true) }
+
             2 -> when (args[0].lowercase()) {
                 "chat_color" -> listOf("paint", "quality", "registered", "note_0", "note_1", "note_2", "note_3", "note_4", "crown", "level")
+                    .filter { it.startsWith(args[1], ignoreCase = true) }
+
                 "nickname_ticket" -> listOf("nickname", "quality", "registered")
+                    .filter { it.startsWith(args[1], ignoreCase = true) }
+
                 "title" -> listOf("title", "quality", "registered")
+                    .filter { it.startsWith(args[1], ignoreCase = true) }
+
                 else -> emptyList()
             }
-            3 -> {
-                when (args[0].lowercase()) {
-                    "title" -> listOf("basic", "legendary", "mythic", "ascendant", "rare", "unobtainable")
-                    else -> emptyList()
-                }
+
+            3 -> when (args[0].lowercase()) {
+                "title" -> if (args[1].lowercase() == "quality") {
+                    listOf("basic", "legendary", "mythic", "ascendant", "rare", "unobtainable")
+                        .filter { it.startsWith(args[2], ignoreCase = true) }
+                } else emptyList()
+                else -> emptyList()
             }
+
             else -> emptyList()
         }
     }
