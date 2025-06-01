@@ -1,6 +1,7 @@
 package com.solecloth7.cosmeticsPluginOPL.listener
 
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
+import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import com.solecloth7.cosmeticsPluginOPL.util.ColorUtil
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -13,6 +14,10 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
     @EventHandler
     fun onChat(e: AsyncPlayerChatEvent) {
         val player = e.player
+
+        // ✅ Prevent chat color handling if nickname input is active
+        if (ChatNicknameInputManager.isWaiting(player)) return
+
         val cosmetic = CosmeticManager.getEquippedCosmetic(player) ?: return
 
         // Apply gradient to the chat message
