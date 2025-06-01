@@ -91,7 +91,8 @@ object EquipGUI {
                 }
             }
             6 -> {
-                if (cosmetic.nickname != player.displayName.removePrefix("~")) {
+                // Update this to fix the equip condition
+                if (!cosmetic.nickname.startsWith("~") && cosmetic.nickname != player.displayName) {
                     NicknameTicketManager.equip(player, cosmetic)
                     player.sendMessage("§aEquipped nickname: ~${cosmetic.nickname}")
                 } else {

@@ -38,13 +38,13 @@ object NicknameTicketManager {
 
     fun equip(player: Player, ticket: NicknameTicketCosmetic.Used) {
         equippedNicknameMap[player.uniqueId.toString()] = ticket.nickname
-        player.setDisplayName("~${ticket.nickname}")
+        player.setDisplayName("~${ticket.nickname}")  // Ensure correct formatting
         save(player)
     }
 
     fun unequip(player: Player) {
         equippedNicknameMap[player.uniqueId.toString()] = null
-        player.setDisplayName(player.name)
+        player.setDisplayName(player.name)  // Revert display name to original
         save(player)
     }
 
