@@ -1,0 +1,14 @@
+name: CosmeticsPluginOPL
+version: '1.0-SNAPSHOT'
+main: com.solecloth7.cosmeticsPluginOPL.CosmeticsPluginOPL
+api-version: '1.21'
+authors: [ SoleCloth7 ]
+website: https://eternalvoid.netlify.app
+commands:
+  backpack:
+    description: Opens a cosmetic Backpack.
+    usage: /backpack
+  a:
+    description: Main a command.
+    usage: /a <subcommand>
+    aliases: []
