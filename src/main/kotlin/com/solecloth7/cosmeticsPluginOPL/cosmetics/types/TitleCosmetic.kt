@@ -15,10 +15,10 @@ data class TitleCosmetic(
 ) {
     // Get display name with quality before title, with color gradient applied
     fun getDisplayName(): String {
-        val qualityDisplay = quality.replaceFirstChar { it.uppercase() }
-        // Applying color gradient based on the quality
-        return when (quality.lowercase()) {
+        // This part is for displaying the quality in the backpack but not in chat
+        val preview = when (quality.lowercase()) {
             "ascendant" -> {
+                // Gradient for Ascendant titles, showing quality in backpack
                 "§x§E§E§8§8§0§0§lA" +
                         "§x§D§E§A§1§0§0§ls" +
                         "§x§E§4§C§1§0§0§lc" +
@@ -27,28 +27,31 @@ data class TitleCosmetic(
                         "§x§E§B§D§A§4§C§ld" +
                         "§x§D§8§B§7§0§0§la" +
                         "§x§D§E§A§1§0§0§ln" +
-                        "§x§F§1§8§9§0§0§lt §r§c§l$qualityDisplay Title: §8[§7$title§8]"
+                        "§x§F§1§8§9§0§0§lt §r$title"
             }
             "unobtainable" -> {
-                "§f§r家 §d§l$qualityDisplay Title: §8[§7$title§8]"
+                "§f§r家 §d§lUnobtainable Title: $title"
             }
             "basic" -> {
-                "§7Basic Title: §8[§7$title§8]"
+                "§7Basic Title: $title"
             }
             "legendary" -> {
-                "§6§lLegendary Title: §8[§7$title§8]"
+                "§6§lLegendary Title: $title"
             }
             "mythic" -> {
-                "§5Mythic Title: §8[§7$title§8]"
+                "§5Mythic Title: $title"
             }
             "rare" -> {
-                "§2Rare Title: §8[§7$title§8]"
+                "§2Rare Title: $title"
             }
             else -> {
-                "§7$qualityDisplay Title: §8[§7$title§8]"
+                "§7Title: $title"
             }
         }
+
+        return title
     }
+
 
     fun getLore(): List<String> {
         return listOfNotNull(
