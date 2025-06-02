@@ -7,7 +7,6 @@ import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
-import com.solecloth7.cosmeticsPluginOPL.gui.ItemMoveSession
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -17,7 +16,6 @@ import org.bukkit.inventory.ItemStack
 
 object BackpackGUI {
     private const val SIZE = 36
-    private const val MOVE_SLOT = SIZE - 1
     private const val VIEWING_PREFIX = "Viewing Backpack: "
     private const val SELECTING_PREFIX = "Selecting Backpack: "
     private const val TITLE = "Cosmetic Backpack" // Define the TITLE constant
@@ -43,7 +41,7 @@ object BackpackGUI {
         val allCosmetics = chatColors + nicknames + titles
 
         for ((i, cosmetic) in allCosmetics.withIndex()) {
-            if (i >= MOVE_SLOT) break
+            if (i >= SIZE) break
             val item = when (cosmetic) {
                 is ChatColorCosmetic -> cosmetic.toItem()
                 is NicknameTicketCosmetic -> cosmetic.toItem()
@@ -53,15 +51,11 @@ object BackpackGUI {
             inv.setItem(i, item)
         }
 
-        for (i in allCosmetics.size until MOVE_SLOT) {
+        for (i in allCosmetics.size until SIZE) {
             inv.setItem(i, ItemStack(Material.GRAY_STAINED_GLASS_PANE).apply {
                 itemMeta = itemMeta?.apply { setDisplayName("§7Cosmetic Slot") }
             })
         }
-
-        inv.setItem(MOVE_SLOT, ItemStack(Material.YELLOW_STAINED_GLASS_PANE).apply {
-            itemMeta = itemMeta?.apply { setDisplayName("§e§lMove Item") }
-        })
 
         viewer.openInventory(inv)
     }
@@ -74,35 +68,12 @@ object BackpackGUI {
         if (event.view.title != TITLE) return
         event.isCancelled = true
 
-        if (slot == MOVE_SLOT) {
-            player.sendMessage("§eClick a cosmetic to move it to a new slot.")
-            return
-        }
-
         val all = mutableListOf<Any>()
         all.addAll(CosmeticManager.getCosmetics(player))
         all.addAll(NicknameTicketManager.getCosmetics(player))
         all.addAll(CosmeticManager.getTitleCosmetics(player))
 
-        val movingSlot = ItemMoveSession.getMovingSlot(player.uniqueId)
-        if (movingSlot != null && movingSlot != slot) {
-            val from = inventory.getItem(movingSlot)
-            val to = inventory.getItem(slot)
-
-            inventory.setItem(slot, from)
-            inventory.setItem(movingSlot, to)
-
-            player.sendMessage("§aMoved item from slot $movingSlot to $slot.")
-            ItemMoveSession.clear(player.uniqueId)
-            return
-        }
-
-        if (clicked.type == Material.PAPER) {
-            ItemMoveSession.startMove(player.uniqueId, slot)
-            player.sendMessage("§eNow click another slot to move this item.")
-            return
-        }
-
+        // Handle interactions with cosmetics
         val cosmetic = all.getOrNull(slot) ?: return
         when (cosmetic) {
             is ChatColorCosmetic -> EquipGUI.openChatColor(player, cosmetic)
