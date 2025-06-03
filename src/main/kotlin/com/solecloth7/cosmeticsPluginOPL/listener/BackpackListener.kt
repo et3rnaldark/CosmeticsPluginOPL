@@ -2,12 +2,12 @@ package com.solecloth7.cosmeticsPluginOPL.listener
 
 import com.solecloth7.cosmeticsPluginOPL.gui.BackpackGUI
 import com.solecloth7.cosmeticsPluginOPL.gui.EquipGUI
+import com.solecloth7.cosmeticsPluginOPL.gui.NicknamePaintGUI
 import com.solecloth7.cosmeticsPluginOPL.admin.AdminBackpackSession
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
-import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -30,6 +30,24 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
         val clickedItem = e.currentItem
         if (clickedItem?.type == Material.GRAY_STAINED_GLASS_PANE) {
             e.isCancelled = true
+            return
+        }
+
+        // Block nickname ticket dragging inside paint GUI
+        if (title == "Select a Nickname Ticket") {
+            e.isCancelled = true
+            if (!e.click.isLeftClick || e.click.isShiftClick) return
+            NicknamePaintGUI.handleClick(e)
+            return
+        }
+
+        // Open nickname paint GUI if clicked item is a nickname paint
+        val paint = CosmeticManager.getNicknamePaints(player)
+            .find { it.toItemStack().isSimilar(clickedItem) }
+
+        if (paint != null) {
+            e.isCancelled = true
+            NicknamePaintGUI.open(player, paint)
             return
         }
 
@@ -92,10 +110,12 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
     @EventHandler
     fun onDrag(e: InventoryDragEvent) {
         val title = e.view.title
-        if (title == "Cosmetic Backpack" ||
+        if (
+            title == "Cosmetic Backpack" ||
             title == "Equip Chat Color" ||
             title == "Equip Nickname" ||
             title == "Equip Title" ||
+            title == "Select a Nickname Ticket" ||
             title.startsWith("Viewing Backpack: ") ||
             title.startsWith("Selecting Backpack: ")
         ) {
@@ -108,7 +128,7 @@ class BackpackListener(private val plugin: JavaPlugin) : Listener {
         val player = e.player
         if (ChatNicknameInputManager.isWaiting(player)) {
             e.isCancelled = true
-            Bukkit.getScheduler().runTask(plugin, Runnable {
+                Bukkit.getScheduler().runTask(plugin, Runnable {
                 ChatNicknameInputManager.handleChat(player, e.message)
             })
         }

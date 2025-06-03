@@ -1,6 +1,7 @@
 package com.solecloth7.cosmeticsPluginOPL.cosmetics
 
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknamePaintCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import com.solecloth7.cosmeticsPluginOPL.storage.JsonBackpackStorage
 import org.bukkit.entity.Player
@@ -9,6 +10,7 @@ import java.util.*
 object CosmeticManager {
     private val loadedCosmetics = mutableMapOf<String, MutableList<ChatColorCosmetic>>()
     private val equippedIndex = mutableMapOf<String, Int?>()
+    private val nicknamePaintsMap = mutableMapOf<String, MutableList<NicknamePaintCosmetic>>()
 
     private val titleCosmeticsMap = mutableMapOf<String, MutableList<TitleCosmetic>>()
     private val equippedTitleIdMap = mutableMapOf<String, UUID?>()
@@ -22,6 +24,8 @@ object CosmeticManager {
 
         titleCosmeticsMap[uuid] = data.titleCosmetics.toMutableList()
         equippedTitleIdMap[uuid] = data.equippedTitleId
+        nicknamePaintsMap[uuid] = data.nicknamePaintCosmetics.toMutableList()
+
     }
 
     fun save(player: Player) {
@@ -32,8 +36,9 @@ object CosmeticManager {
         val nicknameTickets = NicknameTicketManager.getCosmetics(player)
         val titles = titleCosmeticsMap[uuid] ?: mutableListOf()
         val equippedTitleId = equippedTitleIdMap[uuid]
+        val nicknamePaints = nicknamePaintsMap[uuid] ?: mutableListOf()
+        JsonBackpackStorage.saveBackpack(player, chatColors, equipped, nicknameTickets, nicknamePaints, titles, equippedTitleId)
 
-        JsonBackpackStorage.saveBackpack(player, chatColors, equipped, nicknameTickets, titles, equippedTitleId)
     }
 
     // ---------------- ChatColorCosmetic ----------------
@@ -133,4 +138,32 @@ object CosmeticManager {
         val id = equippedTitleIdMap[player.uniqueId.toString()] ?: return null
         return getTitleCosmetics(player).firstOrNull { it.id == id }
     }
+
+
+    // -- NicknamePaints -- \\
+
+    fun getNicknamePaints(player: Player): List<NicknamePaintCosmetic> =
+        nicknamePaintsMap[player.uniqueId.toString()] ?: emptyList()
+
+    fun giveNicknamePaint(player: Player, cosmetic: NicknamePaintCosmetic) {
+        val list = nicknamePaintsMap.getOrPut(player.uniqueId.toString()) { mutableListOf() }
+        list.add(cosmetic)
+        save(player)
+    }
+
+    fun updateNicknamePaint(player: Player, cosmetic: NicknamePaintCosmetic) {
+        val list = nicknamePaintsMap[player.uniqueId.toString()] ?: return
+        val index = list.indexOfFirst { it.id == cosmetic.id }
+        if (index != -1) {
+            list[index] = cosmetic
+            save(player)
+        }
+    }
+
+    fun deleteNicknamePaint(player: Player, cosmetic: NicknamePaintCosmetic) {
+        val list = nicknamePaintsMap[player.uniqueId.toString()] ?: return
+        list.removeIf { it.id == cosmetic.id }
+        save(player)
+    }
+
 }

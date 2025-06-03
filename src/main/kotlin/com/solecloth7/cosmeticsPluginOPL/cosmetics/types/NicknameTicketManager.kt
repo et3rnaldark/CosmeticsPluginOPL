@@ -1,10 +1,11 @@
+// NicknameTicketManager.kt
 package com.solecloth7.cosmeticsPluginOPL.cosmetics
 
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.storage.JsonBackpackStorage
-import org.bukkit.entity.Player
 import net.luckperms.api.LuckPermsProvider
 import net.luckperms.api.node.types.MetaNode
+import org.bukkit.entity.Player
 
 object NicknameTicketManager {
     private val loaded = mutableMapOf<String, MutableList<NicknameTicketCosmetic>>()
@@ -20,12 +21,12 @@ object NicknameTicketManager {
         val nicknameData = loaded[player.uniqueId.toString()] ?: mutableListOf()
         val titleCosmetics = CosmeticManager.getTitleCosmetics(player)
         val equippedTitleId = CosmeticManager.getEquippedTitle(player)?.id
-        JsonBackpackStorage.saveBackpack(player, chatColorData, CosmeticManager.getEquippedIndex(player), nicknameData, titleCosmetics, equippedTitleId)
+        val paints = CosmeticManager.getNicknamePaints(player)
+        JsonBackpackStorage.saveBackpack(player, chatColorData, CosmeticManager.getEquippedIndex(player), nicknameData, paints, titleCosmetics, equippedTitleId)
     }
 
-    fun getCosmetics(player: Player): List<NicknameTicketCosmetic> {
-        return loaded[player.uniqueId.toString()] ?: emptyList()
-    }
+    fun getCosmetics(player: Player): List<NicknameTicketCosmetic> =
+        loaded[player.uniqueId.toString()] ?: emptyList()
 
     fun setCosmetic(player: Player, index: Int, cosmetic: NicknameTicketCosmetic) {
         val list = loaded[player.uniqueId.toString()] ?: return
@@ -35,13 +36,26 @@ object NicknameTicketManager {
         }
     }
 
+    fun updateCosmetic(player: Player, cosmetic: NicknameTicketCosmetic) {
+        val list = loaded[player.uniqueId.toString()] ?: return
+        val index = list.indexOfFirst { it.id == cosmetic.id }
+        if (index != -1) {
+            list[index] = cosmetic
+            save(player)
+        }
+    }
+
+    fun deleteNicknamePaint(player: Player, paint: com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknamePaintCosmetic) {
+        CosmeticManager.deleteNicknamePaint(player, paint)
+    }
+
     fun applyNickname(player: Player, nickname: String) {
         val luckPerms = LuckPermsProvider.get()
         val user = luckPerms.userManager.getUser(player.uniqueId) ?: return
 
         user.data().clear { it is MetaNode && it.key == "nickname" }
 
-        val node = MetaNode.builder("nickname", "~$nickname").build()
+        val node = MetaNode.builder("nickname", "§8~§f$nickname").build()
         user.data().add(node)
 
         luckPerms.userManager.saveUser(user)
@@ -63,7 +77,6 @@ object NicknameTicketManager {
         equippedNicknameMap[player.uniqueId.toString()] = null
         player.setDisplayName(player.name)
 
-        // Clear LuckPerms nickname
         val luckPerms = LuckPermsProvider.get()
         val user = luckPerms.userManager.getUser(player.uniqueId)
         user?.data()?.clear { it is MetaNode && it.key == "nickname" }
@@ -72,9 +85,8 @@ object NicknameTicketManager {
         save(player)
     }
 
-    fun isEquipped(player: Player, ticket: NicknameTicketCosmetic.Used): Boolean {
-        return equippedNicknameMap[player.uniqueId.toString()] == ticket.nickname
-    }
+    fun isEquipped(player: Player, ticket: NicknameTicketCosmetic.Used): Boolean =
+        equippedNicknameMap[player.uniqueId.toString()] == ticket.nickname
 
     fun getEquippedNickname(player: Player): NicknameTicketCosmetic.Used? {
         val name = equippedNicknameMap[player.uniqueId.toString()] ?: return null

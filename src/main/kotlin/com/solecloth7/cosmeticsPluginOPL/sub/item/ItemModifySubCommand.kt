@@ -1,4 +1,5 @@
 package com.solecloth7.cosmeticsPluginOPL.command.sub.item
+import com.solecloth7.cosmeticsPluginOPL.command.modify.NicknamePaintModifyCommand
 
 import com.solecloth7.cosmeticsPluginOPL.command.AdminSubcommand
 import com.solecloth7.cosmeticsPluginOPL.command.modify.ChatColorModifyCommand
@@ -20,6 +21,8 @@ class ItemModifySubcommand : AdminSubcommand {
             "chat_color" -> ChatColorModifyCommand.handle(sender, args.drop(1))
             "nickname_ticket" -> NicknameTicketModifyCommand.handle(sender, args.drop(1))
             "title" -> TitleModifyCommand.handle(sender, args.drop(1))
+            "nickname_paint" -> NicknamePaintModifyCommand.handle(sender, args.drop(1))
+
             else -> sender.sendMessage("§cUnsupported cosmetic type: $type")
         }
     }
@@ -37,14 +40,22 @@ class ItemModifySubcommand : AdminSubcommand {
 
                 "title" -> listOf("title", "quality", "registered")
                     .filter { it.startsWith(args[1], ignoreCase = true) }
-
+                "nickname_paint" -> listOf("paint", "quality")
+                    .filter { it.startsWith(args[1], ignoreCase = true)}
                 else -> emptyList()
             }
-
+            2 -> when(args[0].lowercase()) {
+                "chat_color" -> if(args[1].lowercase() == "quality") {
+                    listOf("basic", "legendary", "mythic", "ascendant", "rare", "unobtainable")
+                        .filter { it.startsWith(args[2], ignoreCase = true) }
+                } else emptyList()
+                else -> emptyList()
+            }
             3 -> when (args[0].lowercase()) {
                 "title" -> if (args[1].lowercase() == "quality") {
                     listOf("basic", "legendary", "mythic", "ascendant", "rare", "unobtainable")
                         .filter { it.startsWith(args[2], ignoreCase = true) }
+
                 } else emptyList()
                 else -> emptyList()
             }

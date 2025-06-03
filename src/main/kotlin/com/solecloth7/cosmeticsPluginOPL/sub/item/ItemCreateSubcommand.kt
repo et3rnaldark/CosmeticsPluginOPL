@@ -4,6 +4,7 @@ import com.solecloth7.cosmeticsPluginOPL.command.AdminSubcommand
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknamePaintCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import org.bukkit.Bukkit
@@ -32,32 +33,50 @@ class ItemCreateSubcommand : AdminSubcommand {
         when (type) {
             "chat_color" -> {
                 CosmeticManager.load(target)
-                CosmeticManager.giveCosmetic(target, ChatColorCosmetic.default())
-                sender.sendMessage("§aGave default Chat Color to §e${target.name}§a.")
+                val cosmetic = ChatColorCosmetic.default()
+                CosmeticManager.giveCosmetic(target, cosmetic)
+                val index = CosmeticManager.getCosmetics(target).indexOf(cosmetic)
+                if (index != -1 && sender is Player) {
+                    com.solecloth7.cosmeticsPluginOPL.admin.AdminSelectionManager.select(sender.uniqueId, target.uniqueId, index)
+                    sender.sendMessage("§aGave and selected default Chat Color for §e${target.name}§a.")
+                }
             }
 
             "nickname_ticket" -> {
                 NicknameTicketManager.load(target)
-                NicknameTicketManager.giveCosmetic(target, NicknameTicketCosmetic.Unused())
-                sender.sendMessage("§aGave Nickname Ticket to §e${target.name}§a.")
+                val cosmetic = NicknameTicketCosmetic.Unused()
+                NicknameTicketManager.giveCosmetic(target, cosmetic)
+                val index = NicknameTicketManager.getCosmetics(target).indexOf(cosmetic)
+                if (index != -1 && sender is Player) {
+                    com.solecloth7.cosmeticsPluginOPL.admin.AdminSelectionManager.select(sender.uniqueId, target.uniqueId, index)
+                    sender.sendMessage("§aGave and selected Nickname Ticket for §e${target.name}§a.")
+                }
             }
 
             "title" -> {
                 CosmeticManager.load(target)
-                CosmeticManager.giveTitleCosmetic(target, TitleCosmetic())
-                sender.sendMessage("§aGave default Title to §e${target.name}§a.")
+                val cosmetic = TitleCosmetic()
+                CosmeticManager.giveTitleCosmetic(target, cosmetic)
+                val index = CosmeticManager.getTitleCosmetics(target).indexOfFirst { it.id == cosmetic.id }
+                if (index != -1 && sender is Player) {
+                    com.solecloth7.cosmeticsPluginOPL.admin.AdminSelectionManager.select(sender.uniqueId, target.uniqueId, index)
+                    sender.sendMessage("§aGave and selected Title Cosmetic for §e${target.name}§a.")
+                }
             }
-
+            "nickname_paint" -> {
+                CosmeticManager.load(target)
+                CosmeticManager.giveNicknamePaint(target, NicknamePaintCosmetic.default())
+                sender.sendMessage("§aGave Nickname Paint to §e${target.name}§a.")
+            }
             else -> {
                 sender.sendMessage("§cUnsupported cosmetic type: $type")
             }
         }
     }
-
     override fun tabComplete(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
             1 -> Bukkit.getOnlinePlayers().map { it.name }.filter { it.startsWith(args[0], ignoreCase = true) }
-            2 -> listOf("chat_color", "nickname_ticket", "title").filter { it.startsWith(args[1], ignoreCase = true) }
+            2 -> listOf("chat_color", "nickname_ticket", "title", "nickname_paint").filter { it.startsWith(args[1], ignoreCase = true) }
             else -> emptyList()
         }
     }

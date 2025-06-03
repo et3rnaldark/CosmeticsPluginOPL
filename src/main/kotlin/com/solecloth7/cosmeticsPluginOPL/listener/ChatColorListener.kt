@@ -31,11 +31,12 @@ class ChatColorListener(private val plugin: JavaPlugin) : Listener {
 
         Bukkit.getScheduler().runTask(plugin, Runnable {
             val nickname = NicknameTicketManager.getEquippedNickname(player)?.nickname
-            val name = if (nickname != null) "§f~$nickname" else player.name
+            val name = if (nickname != null) "§8~§7$nickname" else player.name
 
-            val title = CosmeticManager.getEquippedTitle(player)?.getDisplayName()?.let {
-                "§8$it "
+            val title = CosmeticManager.getEquippedTitle(player)?.title?.let {
+                "§8[§7$it§8] "
             } ?: ""
+
 
             val chatColor = CosmeticManager.getEquippedCosmetic(player)
             val message = chatColor?.let {

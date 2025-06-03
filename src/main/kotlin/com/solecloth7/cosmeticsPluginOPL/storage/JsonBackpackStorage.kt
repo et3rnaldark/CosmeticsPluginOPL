@@ -3,6 +3,7 @@ package com.solecloth7.cosmeticsPluginOPL.storage
 import com.google.gson.*
 import com.solecloth7.cosmeticsPluginOPL.model.BackpackData
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknamePaintCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic.*
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
@@ -26,6 +27,7 @@ object JsonBackpackStorage {
         cosmetics: List<ChatColorCosmetic>,
         equipped: Int?,
         nicknameTickets: List<NicknameTicketCosmetic>,
+        nicknamePaints: List<NicknamePaintCosmetic>,
         titleCosmetics: List<TitleCosmetic>,
         equippedTitleId: UUID?
     ) {
@@ -35,6 +37,7 @@ object JsonBackpackStorage {
         json.add("chatColorCosmetics", gson.toJsonTree(cosmetics))
         json.addProperty("equippedChatColorIndex", equipped)
         json.add("nicknameTicketCosmetics", gson.toJsonTree(nicknameTickets))
+        json.add("nicknamePaintCosmetics", gson.toJsonTree(nicknamePaints))
         json.add("titleCosmetics", gson.toJsonTree(titleCosmetics))
         json.addProperty("equippedTitleId", equippedTitleId?.toString())
 
@@ -60,8 +63,32 @@ object JsonBackpackStorage {
         }
     }
 
-    private class NicknameTicketCosmeticAdapter : JsonDeserializer<NicknameTicketCosmetic>, JsonSerializer<NicknameTicketCosmetic> {
-        override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): NicknameTicketCosmetic {
+    fun saveNicknamePaint(player: Player, index: Int, updated: NicknamePaintCosmetic) {
+        val current = loadBackpack(player)
+        val list = current.nicknamePaintCosmetics.toMutableList()
+        if (index < 0 || index >= list.size) return
+        list[index] = updated
+
+        saveBackpack(
+            player,
+            current.chatColorCosmetics,
+            current.equippedChatColorIndex,
+            current.nicknameTicketCosmetics,
+            list,
+            current.titleCosmetics,
+            current.equippedTitleId
+        )
+    }
+
+    private class NicknameTicketCosmeticAdapter :
+        JsonDeserializer<NicknameTicketCosmetic>,
+        JsonSerializer<NicknameTicketCosmetic> {
+
+        override fun deserialize(
+            json: JsonElement,
+            typeOfT: Type,
+            context: JsonDeserializationContext
+        ): NicknameTicketCosmetic {
             val obj = json.asJsonObject
             return if (obj.has("nickname")) {
                 context.deserialize<Used>(json, Used::class.java)
@@ -70,7 +97,11 @@ object JsonBackpackStorage {
             }
         }
 
-        override fun serialize(src: NicknameTicketCosmetic, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        override fun serialize(
+            src: NicknameTicketCosmetic,
+            typeOfSrc: Type,
+            context: JsonSerializationContext
+        ): JsonElement {
             return when (src) {
                 is Used -> context.serialize(src, Used::class.java)
                 is Unused -> context.serialize(src, Unused::class.java)

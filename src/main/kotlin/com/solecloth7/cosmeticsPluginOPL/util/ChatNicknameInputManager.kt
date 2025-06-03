@@ -46,7 +46,7 @@ object ChatNicknameInputManager {
         NicknameTicketManager.setAll(player, list)
 
         pending.remove(player.uniqueId)
-        player.sendMessage("§aNickname set to §f~$cleanedNickname§a!")
+        player.sendMessage("§aNickname set to §8~§7$cleanedNickname§a!")
         BackpackGUI.open(player)
         return true
     }

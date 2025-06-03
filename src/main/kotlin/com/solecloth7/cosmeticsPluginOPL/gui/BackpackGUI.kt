@@ -1,9 +1,11 @@
 package com.solecloth7.cosmeticsPluginOPL.gui
 
 import com.solecloth7.cosmeticsPluginOPL.admin.AdminBackpackSession
+import com.solecloth7.cosmeticsPluginOPL.admin.AdminSelectionManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.CosmeticManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.NicknameTicketManager
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.ChatColorCosmetic
+import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknamePaintCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.NicknameTicketCosmetic
 import com.solecloth7.cosmeticsPluginOPL.cosmetics.types.TitleCosmetic
 import com.solecloth7.cosmeticsPluginOPL.util.ChatNicknameInputManager
@@ -30,15 +32,20 @@ object BackpackGUI {
     }
 
     private fun openInternal(viewer: Player, target: Player, allowSelect: Boolean) {
-        val title = if (viewer == target) TITLE else {
-            if (allowSelect) "$SELECTING_PREFIX${target.name}" else "$VIEWING_PREFIX${target.name}"
+        val title = if (allowSelect) {
+            "$SELECTING_PREFIX${target.name}"
+        } else if (viewer == target) {
+            TITLE
+        } else {
+            "$VIEWING_PREFIX${target.name}"
         }
 
         val inv: Inventory = Bukkit.createInventory(null, SIZE, title)
         val chatColors = CosmeticManager.getCosmetics(target)
         val nicknames = NicknameTicketManager.getCosmetics(target)
         val titles = CosmeticManager.getTitleCosmetics(target)
-        val allCosmetics = chatColors + nicknames + titles
+        val paints = CosmeticManager.getNicknamePaints(target)
+        val allCosmetics = chatColors + nicknames + titles + paints
 
         for ((i, cosmetic) in allCosmetics.withIndex()) {
             if (i >= SIZE) break
@@ -46,6 +53,7 @@ object BackpackGUI {
                 is ChatColorCosmetic -> cosmetic.toItem()
                 is NicknameTicketCosmetic -> cosmetic.toItem()
                 is TitleCosmetic -> cosmetic.toItem()
+                is NicknamePaintCosmetic -> cosmetic.toItemStack()
                 else -> continue
             }
             inv.setItem(i, item)
@@ -61,19 +69,41 @@ object BackpackGUI {
     }
 
     fun handleClick(player: Player, event: InventoryClickEvent) {
+        val title = event.view.title
         val slot = event.slot
         val clicked = event.currentItem ?: return
         val inventory = event.clickedInventory ?: return
 
-        if (event.view.title != TITLE) return
+        val viewingTarget = AdminBackpackSession.getTarget(player.uniqueId)
+        val isSelecting = AdminBackpackSession.isSelecting(player.uniqueId)
+
+        // If this is selection mode (admin selecting a cosmetic from another player)
+        if (title.startsWith("Selecting Backpack: ") && viewingTarget != null && isSelecting) {
+            event.isCancelled = true
+
+            val targetPlayer = Bukkit.getPlayer(viewingTarget) ?: return
+            val combined = CosmeticManager.getCosmetics(targetPlayer) +
+                    NicknameTicketManager.getCosmetics(targetPlayer) +
+                    CosmeticManager.getTitleCosmetics(targetPlayer) +
+                    CosmeticManager.getNicknamePaints(targetPlayer)
+
+            val cosmetic = combined.getOrNull(slot) ?: return
+            AdminSelectionManager.select(player.uniqueId, viewingTarget, slot)
+            player.sendMessage("§aSelected '${cosmetic.javaClass.simpleName}' from ${targetPlayer.name}'s backpack!")
+            player.closeInventory()
+            return
+        }
+
+        // Regular backpack interaction (self)
+        if (title != TITLE) return
         event.isCancelled = true
 
         val all = mutableListOf<Any>()
         all.addAll(CosmeticManager.getCosmetics(player))
         all.addAll(NicknameTicketManager.getCosmetics(player))
         all.addAll(CosmeticManager.getTitleCosmetics(player))
+        all.addAll(CosmeticManager.getNicknamePaints(player))
 
-        // Handle interactions with cosmetics
         val cosmetic = all.getOrNull(slot) ?: return
         when (cosmetic) {
             is ChatColorCosmetic -> EquipGUI.openChatColor(player, cosmetic)
@@ -84,6 +114,7 @@ object BackpackGUI {
             }
             is NicknameTicketCosmetic.Used -> EquipGUI.openNicknameTicket(player, cosmetic)
             is TitleCosmetic -> EquipGUI.openTitle(player, cosmetic)
+            is NicknamePaintCosmetic -> NicknamePaintGUI.open(player, cosmetic)
         }
     }
 
@@ -94,7 +125,8 @@ object BackpackGUI {
         if (clicked.type == Material.PAPER) {
             val combined = CosmeticManager.getCosmetics(target) +
                     NicknameTicketManager.getCosmetics(target) +
-                    CosmeticManager.getTitleCosmetics(target)
+                    CosmeticManager.getTitleCosmetics(target) +
+                    CosmeticManager.getNicknamePaints(target)
 
             val cosmetic = combined.getOrNull(event.slot) ?: return
 
